@@ -1,112 +1,151 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
+-- BARON MENU v2 (Infinite Jump, Speed, ESP, NoClip, FullBright)
 
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
+-- GUI yarat
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local InfiniteJumpBtn = Instance.new("TextButton")
+local SpeedBtn = Instance.new("TextButton")
+local ESPBtn = Instance.new("TextButton")
+local NoClipBtn = Instance.new("TextButton")
+local FullBrightBtn = Instance.new("TextButton")
 
--- Toggle dəyişənləri
-local infJumpEnabled = false
-local speedEnabled = false
-local espEnabled = false
-local noclipEnabled = false
-local fullbrightEnabled = false
-local speedValue = 50
+ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
 
--- GUI
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-local toggleMenuButton = Instance.new("TextButton", screenGui)
-toggleMenuButton.Size = UDim2.new(0,50,0,50)
-toggleMenuButton.Position = UDim2.new(0,10,0,10)
-toggleMenuButton.Text = "≡"
-toggleMenuButton.BackgroundColor3 = Color3.fromRGB(0,0,0)
-toggleMenuButton.TextColor3 = Color3.fromRGB(255,255,255)
+Frame.Size = UDim2.new(0, 200, 0, 280)
+Frame.Position = UDim2.new(0, 20, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Frame.Parent = ScreenGui
 
-local menuFrame = Instance.new("Frame", screenGui)
-menuFrame.Size = UDim2.new(0,200,0,300)
-menuFrame.Position = UDim2.new(0,10,0,70)
-menuFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-menuFrame.Visible = false
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "🎭 BARON MENU"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Parent = Frame
 
-toggleMenuButton.MouseButton1Click:Connect(function()
-    menuFrame.Visible = not menuFrame.Visible
-end)
-
-local function createToggle(name, posY, callback)
-    local btn = Instance.new("TextButton", menuFrame)
-    btn.Size = UDim2.new(0,180,0,40)
-    btn.Position = UDim2.new(0,10,0,posY)
-    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    btn.TextColor3 = Color3.fromRGB(255,255,255)
-    btn.Text = name .. ": OFF"
-
-    btn.MouseButton1Click:Connect(function()
-        callback()
-        if btn.Text:find("OFF") then
-            btn.Text = name .. ": ON"
-            btn.BackgroundColor3 = Color3.fromRGB(0,150,0)
-        else
-            btn.Text = name .. ": OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-        end
-    end)
+-- BUTTON CREATOR
+function makeButton(btn, txt, y)
+    btn.Size = UDim2.new(1, -20, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, y)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Text = txt
+    btn.Parent = Frame
 end
 
--- Toggles
-createToggle("Inf Jump", 10, function() infJumpEnabled = not infJumpEnabled end)
-createToggle("Speed", 60, function() speedEnabled = not speedEnabled end)
-createToggle("ESP", 110, function() espEnabled = not espEnabled end)
-createToggle("NoClip", 160, function() noclipEnabled = not noclipEnabled end)
-createToggle("FullBright", 210, function()
-    fullbrightEnabled = not fullbrightEnabled
-    if fullbrightEnabled then
+makeButton(InfiniteJumpBtn, "Infinite Jump", 50)
+makeButton(SpeedBtn, "Speed x2", 95)
+makeButton(ESPBtn, "ESP ON", 140)
+makeButton(NoClipBtn, "NoClip", 185)
+makeButton(FullBrightBtn, "FullBright", 230)
+
+--------------------------------------------
+-- INFINITE JUMP
+--------------------------------------------
+local InfiniteJump = false
+InfiniteJumpBtn.MouseButton1Click:Connect(function()
+    InfiniteJump = not InfiniteJump
+    InfiniteJumpBtn.Text = InfiniteJump and "Infinite Jump ✓" or "Infinite Jump"
+end)
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if InfiniteJump then
+        local plr = game.Players.LocalPlayer
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            plr.Character:FindFirstChild("Humanoid"):ChangeState("Jumping")
+        end
+    end
+end)
+
+
+--------------------------------------------
+-- SPEED
+--------------------------------------------
+local SpeedOn = false
+SpeedBtn.MouseButton1Click:Connect(function()
+    SpeedOn = not SpeedOn
+    SpeedBtn.Text = SpeedOn and "Speed ✓" or "Speed x2"
+    if SpeedOn then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
+    else
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+    end
+end)
+
+
+--------------------------------------------
+-- ESP
+--------------------------------------------
+local ESPEnabled = false
+
+function createESP(player)
+    if player == game.Players.LocalPlayer then return end
+    local Highlight = Instance.new("Highlight")
+    Highlight.FillColor = Color3.fromRGB(255,0,0)
+    Highlight.OutlineColor = Color3.fromRGB(0,0,0)
+    Highlight.Parent = player.Character
+end
+
+ESPBtn.MouseButton1Click:Connect(function()
+    ESPEnabled = not ESPEnabled
+    ESPBtn.Text = ESPEnabled and "ESP ✓" or "ESP ON"
+
+    if ESPEnabled then
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character then createESP(plr) end
+        end
+        game.Players.PlayerAdded:Connect(function(plr)
+            plr.CharacterAdded:Connect(function()
+                if ESPEnabled then createESP(plr) end
+            end)
+        end)
+    else
+        for _, plr in pairs(game.Players:GetPlayers()) do
+            if plr.Character and plr.Character:FindFirstChild("Highlight") then
+                plr.Character.Highlight:Destroy()
+            end
+        end
+    end
+end)
+
+
+--------------------------------------------
+-- NOCLIP
+--------------------------------------------
+local noclip = false
+
+NoClipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    NoClipBtn.Text = noclip and "NoClip ✓" or "NoClip"
+end)
+
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip then
+        for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+
+--------------------------------------------
+-- FULLBRIGHT
+--------------------------------------------
+local FullBright = false
+local Lighting = game.Lighting
+
+FullBrightBtn.MouseButton1Click:Connect(function()
+    FullBright = not FullBright
+    FullBrightBtn.Text = FullBright and "FullBright ✓" or "FullBright"
+
+    if FullBright then
         Lighting.Ambient = Color3.new(1,1,1)
         Lighting.Brightness = 2
+        Lighting.ClockTime = 12
     else
-        Lighting.Ambient = Color3.new(0.5,0.5,0.5)
+        Lighting.Ambient = Color3.fromRGB(0,0,0)
         Lighting.Brightness = 1
-    end
-end)
-
--- İnfinite Jump
-UIS.JumpRequest:Connect(function()
-    if infJumpEnabled then
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- Speed
-RunService.RenderStepped:Connect(function()
-    if speedEnabled then
-        humanoid.WalkSpeed = speedValue
-    else
-        humanoid.WalkSpeed = 16
-    end
-end)
-
--- NoClip
-RunService.RenderStepped:Connect(function()
-    if noclipEnabled then
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    else
-        for _, part in pairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-    end
-end)
-
--- ESP (placeholder)
-RunService.RenderStepped:Connect(function()
-    if espEnabled then
-        -- ESP kodunu buraya əlavə edə bilərsən
     end
 end)
