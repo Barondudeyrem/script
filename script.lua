@@ -1,4 +1,4 @@
--- BARON PROFESSIONAL GUI (RED-BLACK + BLUE HOVER + RGB BORDER)
+-- BARON GUI v2 (FULL ESP + OPEN/CLOSE + EFFECTS)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,25 +10,23 @@ local Camera = workspace.CurrentCamera
 
 -- ======= GUI CREATION =======
 local function createGUI()
-    -- Destroy old GUI if exists
     if LocalPlayer.PlayerGui:FindFirstChild("BaronGUI") then
         LocalPlayer.PlayerGui.BaronGUI:Destroy()
     end
 
-    -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "BaronGUI"
     ScreenGui.Parent = LocalPlayer.PlayerGui
 
-    -- Main Frame
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(0, 300, 0, 450)
     Frame.Position = UDim2.new(0.5, -150, 0.4, -225)
     Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
     Frame.BorderSizePixel = 0
+    Frame.Visible = true
     Frame.Parent = ScreenGui
 
-    -- RGB Animated Border
+    -- RGB Border
     local UIStroke = Instance.new("UIStroke")
     UIStroke.Thickness = 2
     UIStroke.Parent = Frame
@@ -37,15 +35,15 @@ local function createGUI()
         UIStroke.Color = Color3.fromHSV(t%1,1,1)
     end)
 
-    -- Scrollable Frame
+    -- Scroll Frame
     local Scroller = Instance.new("ScrollingFrame")
     Scroller.Size = UDim2.new(1,0,1,0)
-    Scroller.CanvasSize = UDim2.new(0,0,0,600)
-    Scroller.ScrollBarThickness = 6
     Scroller.BackgroundTransparency = 1
+    Scroller.ScrollBarThickness = 6
+    Scroller.CanvasSize = UDim2.new(0,0,0,600)
     Scroller.Parent = Frame
 
-    -- Top Title
+    -- Title
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1,0,0,40)
     Title.BackgroundColor3 = Color3.fromRGB(35,35,35)
@@ -55,8 +53,8 @@ local function createGUI()
     Title.Font = Enum.Font.SourceSansBold
     Title.Parent = Scroller
 
-    -- Button Creator with Blue Hover Animation
-    local function NewBtn(text, y, callback)
+    -- Button creator
+    local function NewBtn(text,y,callback)
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(0,260,0,40)
         btn.Position = UDim2.new(0,20,0,y)
@@ -79,50 +77,43 @@ local function createGUI()
 
     local yPos = 50
 
-    -- ======= INFINITE JUMP =======
-    local infiniteJump = false
-    NewBtn("Toggle Infinite Jump", yPos, function()
-        infiniteJump = not infiniteJump
-    end)
+    -- ===== INFINITE JUMP =====
+    local infJump=false
+    NewBtn("Toggle Infinite Jump",yPos,function() infJump = not infJump end)
     yPos = yPos + 60
-
     UIS.JumpRequest:Connect(function()
-        if infiniteJump then
-            local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if h then h:ChangeState("Jumping") end
+        if infJump then
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum:ChangeState("Jumping") end
         end
     end)
 
-    -- ======= SPEED =======
-    local speedOn = false
-    local speedValue = 50
-    NewBtn("Toggle Speed Hack", yPos, function()
+    -- ===== SPEED =====
+    local speedOn=false
+    local speedValue=50
+    NewBtn("Toggle Speed Hack",yPos,function()
         speedOn = not speedOn
-        local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if h then h.WalkSpeed = speedOn and speedValue or 16 end
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = speedOn and speedValue or 16 end
     end)
     yPos = yPos + 60
 
-    -- ======= NOCLIP =======
-    local noclipOn = false
-    NewBtn("Toggle Noclip", yPos, function()
-        noclipOn = not noclipOn
-    end)
+    -- ===== NOCLIP =====
+    local noclipOn=false
+    NewBtn("Toggle Noclip",yPos,function() noclipOn = not noclipOn end)
     yPos = yPos + 60
-
     RunService.Stepped:Connect(function()
         if noclipOn and LocalPlayer.Character then
             for _,part in ipairs(LocalPlayer.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
+                if part:IsA("BasePart") then part.CanCollide=false end
             end
         end
     end)
 
-    -- ======= FULLBRIGHT =======
-    local fullbrightOn = false
-    local oldLighting = {Brightness=Lighting.Brightness,ClockTime=Lighting.ClockTime,FogEnd=Lighting.FogEnd,Ambient=Lighting.Ambient}
-
-    NewBtn("Toggle Fullbright", yPos, function()
+    -- ===== FULLBRIGHT =====
+    local fullbrightOn=false
+    local oldLighting={Brightness=Lighting.Brightness,ClockTime=Lighting.ClockTime,FogEnd=Lighting.FogEnd,Ambient=Lighting.Ambient}
+    NewBtn("Toggle Fullbright",yPos,function()
         fullbrightOn = not fullbrightOn
         if fullbrightOn then
             Lighting.Brightness=2
@@ -138,7 +129,7 @@ local function createGUI()
     end)
     yPos = yPos + 60
 
-    -- ======= ESP BOX =======
+    -- ===== ESP BOX =====
     local espOn=false
     local boxes={}
     local function createBox(plr)
@@ -154,15 +145,13 @@ local function createGUI()
     local function removeBox(plr)
         if boxes[plr] then boxes[plr]:Remove() boxes[plr]=nil end
     end
-
-    NewBtn("Toggle ESP Box", yPos, function()
+    NewBtn("Toggle ESP Box",yPos,function()
         espOn = not espOn
         for _,plr in ipairs(Players:GetPlayers()) do
             if espOn then createBox(plr) else removeBox(plr) end
         end
     end)
     yPos = yPos + 60
-
     RunService.RenderStepped:Connect(function()
         if espOn then
             for plr,box in pairs(boxes) do
@@ -171,7 +160,7 @@ local function createGUI()
                     local pos,vis = Camera:WorldToViewportPoint(root.Position)
                     box.Position = Vector2.new(pos.X,pos.Y)
                     box.Size = Vector2.new(50,100)
-                    box.Visible = vis
+                    box.Visible=vis
                 end
             end
         end
@@ -179,7 +168,7 @@ local function createGUI()
 
     Scroller.CanvasSize = UDim2.new(0,0,yPos+50)
 
-    -- ======= OPEN/CLOSE GUI =======
+    -- ===== OPEN/CLOSE GUI =====
     UIS.InputBegan:Connect(function(input)
         if input.KeyCode==Enum.KeyCode.RightShift then
             Frame.Visible = not Frame.Visible
