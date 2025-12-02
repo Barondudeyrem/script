@@ -1,4 +1,5 @@
--- BARON PROFESSIONAL EXECUTOR GUI
+-- BARON PROFESSIONAL GUI (RED-BLACK + BLUE HOVER + RGB BORDER)
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
@@ -7,50 +8,27 @@ local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- ======= STARTUP ANIMATION =======
-local function startupAnimation()
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "BaronStartup"
-    ScreenGui.Parent = LocalPlayer.PlayerGui
-
-    local Label = Instance.new("TextLabel")
-    Label.Size = UDim2.new(0,400,0,100)
-    Label.Position = UDim2.new(0.5,-200,0.8,0)
-    Label.BackgroundTransparency = 1
-    Label.Text = "BARON"
-    Label.Font = Enum.Font.SourceSansBold
-    Label.TextSize = 48
-    Label.TextColor3 = Color3.fromRGB(255,0,0)
-    Label.TextStrokeTransparency = 0
-    Label.Parent = ScreenGui
-
-    Label.TextTransparency = 1
-    TweenService:Create(Label, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-    task.wait(1.2)
-    TweenService:Create(Label, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
-    task.wait(0.8)
-    ScreenGui:Destroy()
-end
-
-startupAnimation()
-
 -- ======= GUI CREATION =======
 local function createGUI()
-    if LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("BaronGUI") then
+    -- Destroy old GUI if exists
+    if LocalPlayer.PlayerGui:FindFirstChild("BaronGUI") then
         LocalPlayer.PlayerGui.BaronGUI:Destroy()
     end
 
+    -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "BaronGUI"
     ScreenGui.Parent = LocalPlayer.PlayerGui
 
+    -- Main Frame
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0,280,0,400)
-    Frame.Position = UDim2.new(-1,0,0,50)
+    Frame.Size = UDim2.new(0, 300, 0, 450)
+    Frame.Position = UDim2.new(0.5, -150, 0.4, -225)
     Frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
     Frame.BorderSizePixel = 0
     Frame.Parent = ScreenGui
 
+    -- RGB Animated Border
     local UIStroke = Instance.new("UIStroke")
     UIStroke.Thickness = 2
     UIStroke.Parent = Frame
@@ -59,27 +37,30 @@ local function createGUI()
         UIStroke.Color = Color3.fromHSV(t%1,1,1)
     end)
 
+    -- Scrollable Frame
     local Scroller = Instance.new("ScrollingFrame")
     Scroller.Size = UDim2.new(1,0,1,0)
+    Scroller.CanvasSize = UDim2.new(0,0,0,600)
+    Scroller.ScrollBarThickness = 6
     Scroller.BackgroundTransparency = 1
-    Scroller.ScrollBarThickness = 5
-    Scroller.CanvasSize = UDim2.new(0,0,0,1000)
     Scroller.Parent = Frame
 
+    -- Top Title
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1,0,0,40)
-    Title.BackgroundTransparency = 1
-    Title.Text = "tiktik:baron_official7"
-    Title.TextColor3 = Color3.fromRGB(255,255,255)
+    Title.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    Title.Text = "BARON"
+    Title.TextColor3 = Color3.fromRGB(255,0,0)
+    Title.TextScaled = true
     Title.Font = Enum.Font.SourceSansBold
-    Title.TextSize = 22
     Title.Parent = Scroller
 
-    local function NewBtn(text,y,callback)
+    -- Button Creator with Blue Hover Animation
+    local function NewBtn(text, y, callback)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0,220,0,35)
-        btn.Position = UDim2.new(0,30,0,y)
-        btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+        btn.Size = UDim2.new(0,260,0,40)
+        btn.Position = UDim2.new(0,20,0,y)
+        btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
         btn.TextColor3 = Color3.fromRGB(255,255,255)
         btn.Font = Enum.Font.SourceSans
         btn.TextSize = 20
@@ -87,24 +68,23 @@ local function createGUI()
         btn.Parent = Scroller
 
         btn.MouseEnter:Connect(function()
-            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3 = Color3.fromRGB(70,70,70)}):Play()
+            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(0,0,200)}):Play()
         end)
         btn.MouseLeave:Connect(function()
-            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+            TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(50,50,50)}):Play()
         end)
-
         btn.MouseButton1Click:Connect(callback)
         return btn
     end
 
-    local yPos = 60
+    local yPos = 50
 
-    -- INFINITE JUMP
+    -- ======= INFINITE JUMP =======
     local infiniteJump = false
-    NewBtn("Toggle Infinite Jump",yPos,function()
+    NewBtn("Toggle Infinite Jump", yPos, function()
         infiniteJump = not infiniteJump
     end)
-    yPos = yPos + 50
+    yPos = yPos + 60
 
     UIS.JumpRequest:Connect(function()
         if infiniteJump then
@@ -113,22 +93,22 @@ local function createGUI()
         end
     end)
 
-    -- SPEED HACK
+    -- ======= SPEED =======
     local speedOn = false
     local speedValue = 50
-    NewBtn("Toggle Speed Hack",yPos,function()
+    NewBtn("Toggle Speed Hack", yPos, function()
         speedOn = not speedOn
         local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if h then h.WalkSpeed = speedOn and speedValue or 16 end
     end)
-    yPos = yPos + 50
+    yPos = yPos + 60
 
-    -- NOCLIP
+    -- ======= NOCLIP =======
     local noclipOn = false
-    NewBtn("Toggle Noclip",yPos,function()
+    NewBtn("Toggle Noclip", yPos, function()
         noclipOn = not noclipOn
     end)
-    yPos = yPos + 50
+    yPos = yPos + 60
 
     RunService.Stepped:Connect(function()
         if noclipOn and LocalPlayer.Character then
@@ -138,37 +118,31 @@ local function createGUI()
         end
     end)
 
-    -- FULLBRIGHT
+    -- ======= FULLBRIGHT =======
     local fullbrightOn = false
-    local oldLighting = {
-        Brightness = Lighting.Brightness,
-        ClockTime = Lighting.ClockTime,
-        FogEnd = Lighting.FogEnd,
-        Ambient = Lighting.Ambient
-    }
+    local oldLighting = {Brightness=Lighting.Brightness,ClockTime=Lighting.ClockTime,FogEnd=Lighting.FogEnd,Ambient=Lighting.Ambient}
 
-    NewBtn("Toggle Fullbright",yPos,function()
+    NewBtn("Toggle Fullbright", yPos, function()
         fullbrightOn = not fullbrightOn
         if fullbrightOn then
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.Ambient = Color3.fromRGB(255,255,255)
+            Lighting.Brightness=2
+            Lighting.ClockTime=14
+            Lighting.FogEnd=100000
+            Lighting.Ambient=Color3.fromRGB(255,255,255)
         else
-            Lighting.Brightness = oldLighting.Brightness
-            Lighting.ClockTime = oldLighting.ClockTime
-            Lighting.FogEnd = oldLighting.FogEnd
-            Lighting.Ambient = oldLighting.Ambient
+            Lighting.Brightness=oldLighting.Brightness
+            Lighting.ClockTime=oldLighting.ClockTime
+            Lighting.FogEnd=oldLighting.FogEnd
+            Lighting.Ambient=oldLighting.Ambient
         end
     end)
-    yPos = yPos + 50
+    yPos = yPos + 60
 
-    -- ESP BOX
+    -- ======= ESP BOX =======
     local espOn=false
     local boxes={}
-
     local function createBox(plr)
-        if plr == LocalPlayer then return end
+        if plr==LocalPlayer then return end
         if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             local box = Drawing.new("Square")
             box.Color = Color3.fromRGB(0,255,0)
@@ -177,24 +151,23 @@ local function createGUI()
             boxes[plr] = box
         end
     end
-
     local function removeBox(plr)
-        if boxes[plr] then boxes[plr]:Remove() boxes[plr] = nil end
+        if boxes[plr] then boxes[plr]:Remove() boxes[plr]=nil end
     end
 
-    NewBtn("Toggle ESP Box",yPos,function()
+    NewBtn("Toggle ESP Box", yPos, function()
         espOn = not espOn
         for _,plr in ipairs(Players:GetPlayers()) do
             if espOn then createBox(plr) else removeBox(plr) end
         end
     end)
-    yPos = yPos + 50
+    yPos = yPos + 60
 
     RunService.RenderStepped:Connect(function()
         if espOn then
             for plr,box in pairs(boxes) do
                 if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-                    local root = plr.Character.HumanoidRootPart
+                    local root=plr.Character.HumanoidRootPart
                     local pos,vis = Camera:WorldToViewportPoint(root.Position)
                     box.Position = Vector2.new(pos.X,pos.Y)
                     box.Size = Vector2.new(50,100)
@@ -205,10 +178,16 @@ local function createGUI()
     end)
 
     Scroller.CanvasSize = UDim2.new(0,0,yPos+50)
+
+    -- ======= OPEN/CLOSE GUI =======
+    UIS.InputBegan:Connect(function(input)
+        if input.KeyCode==Enum.KeyCode.RightShift then
+            Frame.Visible = not Frame.Visible
+        end
+    end)
 end
 
 createGUI()
-
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(1)
     createGUI()
