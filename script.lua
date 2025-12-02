@@ -1,151 +1,154 @@
--- BARON MENU v2 (Infinite Jump, Speed, ESP, NoClip, FullBright)
+-- BARON STYLE MOBILE GUI (Infini Jump, Speed, Noclip, ESP)
 
--- GUI yarat
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local InfiniteJumpBtn = Instance.new("TextButton")
-local SpeedBtn = Instance.new("TextButton")
-local ESPBtn = Instance.new("TextButton")
-local NoClipBtn = Instance.new("TextButton")
-local FullBrightBtn = Instance.new("TextButton")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local playerGui = player:WaitForChild("PlayerGui")
+local uis = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
 
-ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
+screenGui.Name = "BaronGUI"
 
-Frame.Size = UDim2.new(0, 200, 0, 280)
-Frame.Position = UDim2.new(0, 20, 0.3, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-Frame.Parent = ScreenGui
+-- Frame (Menu)
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 250, 0, 200)
+frame.Position = UDim2.new(0.5, -125, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.Visible = false
 
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "🎭 BARON MENU"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Parent = Frame
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Text = "BARON"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(255,0,0)
+title.Parent = frame
 
--- BUTTON CREATOR
-function makeButton(btn, txt, y)
-    btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Text = txt
-    btn.Parent = Frame
+-- Düymələri yaratmaq funksiyası
+local function createButton(text, positionY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Position = UDim2.new(0.1, 0, positionY, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(255,0,0)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.Parent = frame
+    return btn
 end
 
-makeButton(InfiniteJumpBtn, "Infinite Jump", 50)
-makeButton(SpeedBtn, "Speed x2", 95)
-makeButton(ESPBtn, "ESP ON", 140)
-makeButton(NoClipBtn, "NoClip", 185)
-makeButton(FullBrightBtn, "FullBright", 230)
+-- Funksiyaları aktivləşdirmək üçün flaglər
+local infiniJump = false
+local speedHack = false
+local noclip = false
+local esp = false
 
---------------------------------------------
--- INFINITE JUMP
---------------------------------------------
-local InfiniteJump = false
-InfiniteJumpBtn.MouseButton1Click:Connect(function()
-    InfiniteJump = not InfiniteJump
-    InfiniteJumpBtn.Text = InfiniteJump and "Infinite Jump ✓" or "Infinite Jump"
-end)
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if InfiniteJump then
-        local plr = game.Players.LocalPlayer
-        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
-            plr.Character:FindFirstChild("Humanoid"):ChangeState("Jumping")
+-- Infini Jump
+local infiniJumpBtn = createButton("Infini Jump", 0.2)
+uis.InputBegan:Connect(function(input, gameProcessed)
+    if infiniJump and input.UserInputType == Enum.UserInputType.Touch then
+        if character and character:FindFirstChild("Humanoid") then
+            character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end
     end
 end)
+infiniJumpBtn.MouseButton1Click:Connect(function()
+    infiniJump = not infiniJump
+    infiniJumpBtn.Text = infiniJump and "Infini Jump Açıq" or "Infini Jump Bağlı"
+end)
 
-
---------------------------------------------
--- SPEED
---------------------------------------------
-local SpeedOn = false
-SpeedBtn.MouseButton1Click:Connect(function()
-    SpeedOn = not SpeedOn
-    SpeedBtn.Text = SpeedOn and "Speed ✓" or "Speed x2"
-    if SpeedOn then
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 32
+-- Speed Hack
+local speedBtn = createButton("Speed Hack", 0.4)
+local normalSpeed = character.Humanoid.WalkSpeed
+local speedAmount = 50
+speedBtn.MouseButton1Click:Connect(function()
+    speedHack = not speedHack
+    speedBtn.Text = speedHack and "Speed Açıq" or "Speed Bağlı"
+    if speedHack then
+        character.Humanoid.WalkSpeed = speedAmount
     else
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        character.Humanoid.WalkSpeed = normalSpeed
     end
 end)
 
-
---------------------------------------------
--- ESP
---------------------------------------------
-local ESPEnabled = false
-
-function createESP(player)
-    if player == game.Players.LocalPlayer then return end
-    local Highlight = Instance.new("Highlight")
-    Highlight.FillColor = Color3.fromRGB(255,0,0)
-    Highlight.OutlineColor = Color3.fromRGB(0,0,0)
-    Highlight.Parent = player.Character
-end
-
-ESPBtn.MouseButton1Click:Connect(function()
-    ESPEnabled = not ESPEnabled
-    ESPBtn.Text = ESPEnabled and "ESP ✓" or "ESP ON"
-
-    if ESPEnabled then
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character then createESP(plr) end
+-- Noclip
+local noclipBtn = createButton("Noclip", 0.6)
+runService.Stepped:Connect(function()
+    if noclip then
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
         end
-        game.Players.PlayerAdded:Connect(function(plr)
-            plr.CharacterAdded:Connect(function()
-                if ESPEnabled then createESP(plr) end
-            end)
+    else
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+    end
+end)
+noclipBtn.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    noclipBtn.Text = noclip and "Noclip Açıq" or "Noclip Bağlı"
+end)
+
+-- ESP
+local espBtn = createButton("ESP", 0.8)
+local function createESP(player)
+    if player ~= game.Players.LocalPlayer and player.Character and not player.Character:FindFirstChild("ESPBox") then
+        local box = Instance.new("BoxHandleAdornment")
+        box.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+        box.AlwaysOnTop = true
+        box.ZIndex = 10
+        box.Size = Vector3.new(2,3,1)
+        box.Color3 = Color3.fromRGB(0,0,255)
+        box.Transparency = 0.5
+        box.Parent = player.Character:FindFirstChild("HumanoidRootPart")
+        box.Name = "ESPBox"
+    end
+end
+espBtn.MouseButton1Click:Connect(function()
+    esp = not esp
+    espBtn.Text = esp and "ESP Açıq" or "ESP Bağlı"
+    if esp then
+        for _, p in pairs(game.Players:GetPlayers()) do
+            createESP(p)
+        end
+        game.Players.PlayerAdded:Connect(function(p)
+            createESP(p)
         end)
     else
-        for _, plr in pairs(game.Players:GetPlayers()) do
-            if plr.Character and plr.Character:FindFirstChild("Highlight") then
-                plr.Character.Highlight:Destroy()
+        for _, p in pairs(game.Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local box = p.Character.HumanoidRootPart:FindFirstChild("ESPBox")
+                if box then box:Destroy() end
             end
         end
     end
 end)
 
+-- Menu açma düyməsi (mobil)
+local openButton = Instance.new("TextButton")
+openButton.Size = UDim2.new(0, 80, 0, 40)
+openButton.Position = UDim2.new(0.9, -80, 0, 10)
+openButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+openButton.Text = "Menu"
+openButton.TextColor3 = Color3.fromRGB(255,255,255)
+openButton.Font = Enum.Font.GothamBold
+openButton.TextSize = 18
+openButton.Parent = screenGui
 
---------------------------------------------
--- NOCLIP
---------------------------------------------
-local noclip = false
-
-NoClipBtn.MouseButton1Click:Connect(function()
-    noclip = not noclip
-    NoClipBtn.Text = noclip and "NoClip ✓" or "NoClip"
-end)
-
-game:GetService("RunService").Stepped:Connect(function()
-    if noclip then
-        for _, v in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
-        end
-    end
-end)
-
-
---------------------------------------------
--- FULLBRIGHT
---------------------------------------------
-local FullBright = false
-local Lighting = game.Lighting
-
-FullBrightBtn.MouseButton1Click:Connect(function()
-    FullBright = not FullBright
-    FullBrightBtn.Text = FullBright and "FullBright ✓" or "FullBright"
-
-    if FullBright then
-        Lighting.Ambient = Color3.new(1,1,1)
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 12
-    else
-        Lighting.Ambient = Color3.fromRGB(0,0,0)
-        Lighting.Brightness = 1
-    end
+local guiOpen = false
+openButton.MouseButton1Click:Connect(function()
+    guiOpen = not guiOpen
+    frame.Visible = guiOpen
 end)
